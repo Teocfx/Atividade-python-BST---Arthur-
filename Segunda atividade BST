@@ -1,0 +1,157 @@
+def criar_no(valor):
+    return {
+            "valor": valor, 
+            "esquerda": None, 
+            "direita": None
+            }
+
+def inserir(no, valor):  
+    if no is None: 
+        return criar_no(valor)
+    if valor < no["valor"]: 
+        no["esquerda"] = inserir(no["esquerda"], valor)
+    elif valor > no["valor"]: 
+        no["direita"] = inserir(no["direita"], valor)
+    return no
+
+def buscar(no, valor):  
+    if no is None or valor == no["valor"]:
+        return no
+    if valor < no["valor"]:
+        return buscar(no["esquerda"], valor)
+    return buscar(no["direita"], valor)
+
+
+def buscar_com_caminho(no, valor, caminho=[]):
+   
+    if no is None:
+        return None, caminho, len(caminho)
+    
+    comparacoes = len(caminho) + 1
+    caminho = caminho + [no["valor"]]
+    
+    if valor == no["valor"]:
+        return no, caminho, comparacoes
+    if valor < no["valor"]:
+        return buscar_com_caminho(no["esquerda"], valor, caminho)
+    return buscar_com_caminho(no["direita"], valor, caminho)
+
+def em_ordem(no):
+    if no is not None:
+        em_ordem(no["esquerda"])
+        print(no["valor"], end=" ")
+        em_ordem(no["direita"])
+
+def menor_valor(no):
+    atual = no
+    while atual is not None and atual["esquerda"] is not None:
+        atual = atual["esquerda"]
+    return atual
+
+def remover(no, valor):  
+    if no is None: 
+        return None
+    if valor < no["valor"]: 
+        no["esquerda"] = remover(no["esquerda"], valor)
+    elif valor > no["valor"]: 
+        no["direita"] = remover(no["direita"], valor)
+    else:
+       # CASO 1: Sem filho esquerdo
+
+        if no["esquerda"] is None: 
+            return no["direita"]
+       
+        # CASO 2: Sem filho direito
+        
+        if no["direita"] is None: 
+            return no["esquerda"]
+        # CASO 3: Com dois filhos
+       
+        menor = menor_valor(no["direita"])
+        no["valor"] = menor["valor"]
+        no["direita"] = remover(no["direita"], menor["valor"])
+    return no
+
+def tipo_no(no, valor):
+   
+    def encontrar(node):
+        if node is None:
+            return None
+        if valor < node["valor"]:
+            return encontrar(node["esquerda"])
+        elif valor > node["valor"]:
+            return encontrar(node["direita"])
+        else:
+            return node
+    
+    node = encontrar(no)
+    if node is None:
+        return "Nó não encontrado"
+    
+    tem_esq = node["esquerda"] is not None
+    tem_dir = node["direita"] is not None
+    
+    if not tem_esq and not tem_dir:
+        return "Nó sem filhos"
+    elif tem_esq and tem_dir:
+        return "Nó com 2 filhos"
+    else:
+        return "Nó com 1 filho"
+
+def altura(no):  
+    if no is None: 
+        return 0
+    return 1 + max(altura(no["esquerda"]), altura(no["direita"]))
+
+def mostrar_desenho(no, nivel=0, prefixo="Raiz: "):
+    if no is not None:
+        print(" " * (nivel * 4) + prefixo + str(no["valor"]))
+        if no["esquerda"] is not None or no["direita"] is not None:
+            mostrar_desenho(no["esquerda"], nivel + 1, "Esq: ")
+            mostrar_desenho(no["direita"], nivel + 1, "Dir: ")
+
+
+
+if __name__ == "__main__":
+    
+    #  Questão 1 
+    print("QUESTÃO 1 - DESENHO E EXPLICAÇÃO DA ÁRVORE")
+    raiz = None
+    valores = [50, 30, 70, 20, 40, 60, 80]
+    
+    print("Inserindo valores: ", valores)
+    
+    for v in valores:
+        raiz = inserir(raiz, v)
+
+    print("\nÁrvore resultante:")
+    mostrar_desenho(raiz)
+    
+    print(f"\nAltura da árvore: {altura(raiz)} níveis\n")
+
+    # Questão 2 
+    print("QUESTÃO 2 - BUSCA DO VALOR 60")
+    resultado, caminho, comparacoes = buscar_com_caminho(raiz, 60, [])
+    print(f"Resultado: {'Encontrado!' if resultado else 'Não encontrado.'}")
+    print(f"Caminho percorrido: {' -> '.join(map(str, caminho))}")
+    print(f"Comparações realizadas: {comparacoes}\n")
+
+    # Questão 3 
+    print("QUESTÃO 3 - PERCURSO IN-ORDER (Esquerda->Raiz->Direita)")
+    print("Resultado: ", end="")
+    em_ordem(raiz)
+   
+
+    # Questão 4
+    print("QUESTÃO 4 - REMOÇÕES (20, 30, 70)")
+    valores_remover = [20, 30, 70]
+    
+    for v in valores_remover:
+        print(f"\nRemovendo {v} ({tipo_no(raiz, v)})")
+        print("Antes:")
+        mostrar_desenho(raiz)
+        raiz = remover(raiz, v)
+        print("Depois:")
+        mostrar_desenho(raiz)
+    
+    print(f"\nAltura final da árvore: {altura(raiz)} níveis")
