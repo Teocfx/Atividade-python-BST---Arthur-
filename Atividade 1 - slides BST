@@ -1,0 +1,97 @@
+def criar_no(valor):
+    return {
+        "valor": valor,
+        "esquerda": None,
+        "direita": None,
+    }
+
+
+def inserir(no, valor):
+    if no is None:
+        return criar_no(valor)
+    if valor < no["valor"]:
+        no["esquerda"] = inserir(no["esquerda"], valor)
+    elif valor > no["valor"]:
+        no["direita"] = inserir(no["direita"], valor)
+    return no
+
+
+def buscar(no, valor):
+    if no is None:
+        return None
+    if valor == no["valor"]:
+        return no
+    if valor < no["valor"]:
+        return buscar(no["esquerda"], valor)
+    return buscar(no["direita"], valor)
+
+
+def menor_valor(no):
+    atual = no
+    while atual is not None and atual["esquerda"] is not None:
+        atual = atual["esquerda"]
+    return atual
+
+
+def remover(no, valor):
+    if no is None:
+        return None
+
+    
+    if valor < no["valor"]:
+        no["esquerda"] = remover(no["esquerda"], valor)
+    elif valor > no["valor"]:
+        no["direita"] = remover(no["direita"], valor)
+    else:
+        
+        if no["esquerda"] is None:
+            return no["direita"]
+        elif no["direita"] is None:
+            return no["esquerda"]
+
+       
+        sucessor = menor_valor(no["direita"])
+      
+        no["valor"] = sucessor["valor"]
+   
+        no["direita"] = remover(no["direita"], sucessor["valor"])
+
+    return no
+
+
+def imprimir_em_ordem(no):
+    if no is not None:
+        imprimir_em_ordem(no["esquerda"])
+        print(no["valor"], end=" ")
+        imprimir_em_ordem(no["direita"])
+
+
+if __name__ == "__main__":
+    raiz = None
+    valores = [50, 30, 70, 20, 40, 60, 80]
+
+    
+    for valor in valores:
+        raiz = inserir(raiz, valor)
+
+    print("Árvore inicial (Em-ordem):")
+    imprimir_em_ordem(raiz)
+    print("\n" + "-" * 30)
+
+    
+    no_buscado = buscar(raiz, 60)
+    if no_buscado:
+        print(f"Busca: Nó com valor {no_buscado['valor']} foi encontrado!")
+    else:
+        print("Busca: Valor 60 não encontrado.")
+    print("-" * 30)
+
+   
+    print("Removendo o nó 30...")
+    raiz = remover(raiz, 30)
+    print("-" * 30)
+
+   
+    print("Árvore final (Em-ordem após remoção):")
+    imprimir_em_ordem(raiz)
+    print()
